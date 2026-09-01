@@ -16,15 +16,24 @@ DATA_URL = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv(DATA_URL)
+    # encoding="utf-8-sig" : 파일 맨 앞의 BOM(숨은 문자) 때문에
+    # 첫 번째 열 이름이 "날짜"가 아니라 "﻿날짜"로 읽히는 문제를 방지
+    df = pd.read_csv(DATA_URL, encoding="utf-8-sig")
+
+    # 혹시 모를 열 이름 앞뒤 공백도 함께 제거
+    df.columns = df.columns.str.strip()
 
     # 날짜 열을 진짜 날짜(datetime)로 변환 (예: 20230101 -> 2023-01-01)
-    df["날짜"] = pd.to_datetime(df["날짜"], format="%Y%m%d")
+    df["날짜"] = pd.to_datetime(df["날짜"].astype(str).str.strip(), format="%Y%m%d")
 
     return df
 
 
-df = load_data()
+try:
+    df = load_data()
+except Exception as e:
+    st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
+    st.stop()
 
 
 # -----------------------------
