@@ -85,9 +85,56 @@ st.info("💡 이 그래프로 알 수 있는 것: (여기에 문장을 적어 �
 st.divider()
 
 # =============================================================================
-# 구역 3. (다음 그래프를 위한 자리)
+# 구역 3. 날짜별 10위권 일관객 합계 추이
 # =============================================================================
-st.header("3. 다음 그래프 (추가 예정)")
+st.header("3. 날짜별 10위권 일관객 합계 추이")
+
+daily_total = df.groupby("날짜", as_index=False)["일관객"].sum()
+daily_total = daily_total.sort_values("날짜")
+
+fig3 = px.area(
+    daily_total,
+    x="날짜",
+    y="일관객",
+    labels={"날짜": "날짜", "일관객": "일관객 합계"},
+    title="날짜별 10위권 일관객 합계",
+)
+fig3.update_traces(
+    hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra></extra>"
+)
+fig3.update_layout(hovermode="x unified")
+
+# 합계가 가장 컸던 날 3일 표시
+top3_days = daily_total.sort_values("일관객", ascending=False).head(3)
+
+for _, row in top3_days.iterrows():
+    fig3.add_annotation(
+        x=row["날짜"],
+        y=row["일관객"],
+        text=row["날짜"].strftime("%Y-%m-%d"),
+        showarrow=True,
+        arrowhead=2,
+        yshift=10,
+        font=dict(size=11, color="red"),
+    )
+    fig3.add_trace(
+        px.scatter(x=[row["날짜"]], y=[row["일관객"]]).data[0].update(
+            marker=dict(color="red", size=10, symbol="star"),
+            showlegend=False,
+            hovertemplate="날짜: %{x|%Y-%m-%d}<br>합계: %{y:,}명<extra>최고 흥행일</extra>",
+        )
+    )
+
+st.plotly_chart(fig3, use_container_width=True)
+
+st.info("💡 이 그래프로 알 수 있는 것: (여기에 문장을 적어 주세요)")
+
+st.divider()
+
+# =============================================================================
+# 구역 4. (다음 그래프를 위한 자리)
+# =============================================================================
+st.header("4. 다음 그래프 (추가 예정)")
 
 st.write("여기에 새로운 그래프를 추가할 예정입니다.")
 
