@@ -165,9 +165,48 @@ st.info("💡 이 그래프로 알 수 있는 것: (여기에 문장을 적어 �
 st.divider()
 
 # =============================================================================
-# 구역 5. (다음 그래프를 위한 자리)
+# 구역 5. 월 × 요일별 일관객 합계 히트맵
 # =============================================================================
-st.header("5. 다음 그래프 (추가 예정)")
+st.header("5. 월 × 요일별 일관객 합계 히트맵")
+
+df["월"] = df["날짜"].dt.month
+df["요일"] = df["날짜"].dt.dayofweek  # 0=월요일 ... 6=일요일
+
+weekday_names = ["월", "화", "수", "목", "금", "토", "일"]
+df["요일명"] = df["요일"].map(dict(enumerate(weekday_names)))
+
+heatmap_data = (
+    df.groupby(["월", "요일명"])["일관객"].sum().reset_index()
+)
+
+# 월 1~12, 요일 월~일 순서로 피벗
+heatmap_pivot = heatmap_data.pivot(index="월", columns="요일명", values="일관객")
+heatmap_pivot = heatmap_pivot.reindex(columns=weekday_names)
+heatmap_pivot = heatmap_pivot.reindex(index=range(1, 13))
+
+fig5 = px.imshow(
+    heatmap_pivot,
+    labels=dict(x="요일", y="월", color="일관객 합계"),
+    x=weekday_names,
+    y=[f"{m}월" for m in range(1, 13)],
+    color_continuous_scale="Reds",
+    aspect="auto",
+    title="월 × 요일별 일관객 합계",
+)
+fig5.update_traces(
+    hovertemplate="월: %{y}<br>요일: %{x}<br>합계: %{z:,}명<extra></extra>"
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+st.info("💡 이 그래프로 알 수 있는 것: (여기에 문장을 적어 주세요)")
+
+st.divider()
+
+# =============================================================================
+# 구역 6. (다음 그래프를 위한 자리)
+# =============================================================================
+st.header("6. 다음 그래프 (추가 예정)")
 
 st.write("여기에 새로운 그래프를 추가할 예정입니다.")
 
